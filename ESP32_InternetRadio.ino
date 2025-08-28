@@ -1,4 +1,5 @@
 #include <WiFi.h>
+#include <WiFiManager.h> // ★ WiFiManagerライブラリ
 #include <HTTPClient.h>
 #include <U8g2lib.h>
 #include <AiEsp32RotaryEncoder.h>
@@ -6,16 +7,13 @@
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
 #include "freertos/ringbuf.h"
-#include "freertos/semphr.h" // ★ ミューテックス用
+#include "freertos/semphr.h"
 #include "driver/i2s.h"
 #include "mp3_decoder.h"
 
 // -----------------------------------------------------------------------------
 // WiFi & Radio Stations
 // -----------------------------------------------------------------------------
-const char* ssid = "YOUR_WIFI_SSID";
-const char* password = "YOUR_WIFI_PASSWORD";
-
 const char* station_names[] = {"J-Pop Powerplay", "Shibuya Radio", "NHK FM (Tokyo)"};
 const char* station_urls[] = {
     "http://stream.j-pop.im:8000/j-pop_powerplay",
@@ -204,6 +202,23 @@ void http_stream_task(void *pvParameters) {
     }
 }
 
+// ★ WiFiManagerが設定モードに入った時に呼び出される関数
+void configModeCallback (WiFiManager *myWiFiManager) {
+    Serial.println("Entered config mode");
+    Serial.println(WiFi.softAPIP());
+    Serial.println(myWiFiManager->getConfigPortalSSID());
+
+    u8g2.clearBuffer();
+    u8g2.setFont(u8g2_font_ncenB08_tr);
+    u8g2.drawStr(0, 10, "WiFi Setup Mode");
+    u8g2.setFont(u8g2_font_6x10_tf);
+    u8g2.drawStr(0, 25, "Connect to AP:");
+    u8g2.drawStr(0, 38, myWiFiManager->getConfigPortalSSID().c_str());
+    u8g2.drawStr(0, 52, "IP: 192.168.4.1");
+    u8g2.sendBuffer();
+}
+
+
 // =============================================================================
 //  Setup
 // =============================================================================
@@ -213,14 +228,45 @@ void setup() {
     pinMode(BUTTON_PIN, INPUT_PULLUP);
 
     u8g2.begin();
-    
-    WiFi.begin(ssid, password);
-    while (WiFi.status() != WL_CONNECTED) {
-        digitalWrite(LED_PIN, !digitalRead(LED_PIN));
-        delay(250);
-    }
-    digitalWrite(LED_PIN, HIGH);
+    u8g2.setFont(u8g2_font_6x10_tf);
+    u8g2.drawStr(0, 10, "Starting up...");
+    u8g2.sendBuffer();
 
+    // --- WiFiManager Setup ---
+    WiFiManager wm;
+    
+    // 設定モードに入った時のコールバック関数を登録
+    wm.setAPCallback(configModeCallback);
+    
+    // 3分(180秒)経っても設定されなかったらタイムアウトして再起動
+    wm.setConfigPortalTimeout(180);
+
+    // LEDを点滅開始
+    Ticker blinker;
+    blinker.attach_ms(250, []() { digitalWrite(LED_PIN, !digitalRead(LED_PIN)); });
+
+    // autoConnect: 保存された情報で接続を試み、失敗したら設定ポータルを開始
+    if (!wm.autoConnect("InternetRadio_Setup")) {
+        Serial.println("Failed to connect and hit timeout");
+        u8g2.clearBuffer();
+        u8g2.drawStr(0, 10, "Setup Timeout!");
+        u8g2.sendBuffer();
+        delay(3000);
+        ESP.restart();
+    }
+    
+    // --- WiFi Connected ---
+    blinker.detach(); // 点滅を停止
+    digitalWrite(LED_PIN, HIGH); // 点灯させる
+    Serial.println("\nWiFi connected!");
+    
+    u8g2.clearBuffer();
+    u8g2.drawStr(0, 10, "WiFi Connected!");
+    u8g2.sendBuffer();
+    delay(1000);
+
+
+    // --- Start All Tasks ---
     setup_i2s();
     mp3_decoder = new MP3_DECODER();
     
