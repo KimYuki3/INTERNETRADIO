@@ -14,11 +14,27 @@
 // -----------------------------------------------------------------------------
 // WiFi & Radio Stations
 // -----------------------------------------------------------------------------
-const char* station_names[] = {"J-Pop Powerplay", "Shibuya Radio", "NHK FM (Tokyo)"};
+const char* station_names[] = {
+    // Classical
+    "Linn Classical", "Radio Swiss Classic", "Venice Classic Radio", "Abacus.fm - Mozart", "Abacus.fm - Beethoven",
+    "Abacus.fm - Bach", "KUSC Classical", "WCPE The Classical", "WCRB Classical", "King FM Classical",
+    // Jazz
+    "Linn Jazz", "Radio Swiss Jazz", "The Jazz Groove", "JAZZ.FM91", "WBGO Jazz88",
+    "KJAZZ 88.1", "WJSU - The Jazz Spot", "ABC Jazz", "Jazz24", "TSF Jazz",
+    // Healing / Ambient
+    "SomaFM - Drone Zone", "SomaFM - Groove Salad", "SomaFM - Lush", "SomaFM - Space Station", "An Ambient Sleeping Pill",
+    "Radio Art - Sleep", "Radio Art - Stress Relief", "Ambi Nature Radio", "Chillkyway", "StillStream"
+};
 const char* station_urls[] = {
-    "http://stream.j-pop.im:8000/j-pop_powerplay",
-    "http://shibuyaradio.net:8000/stream",
-    "https://nhkradioakfm-i.akamaihd.net/hls/live/512290/1-fm/1-fm-01.m3u8"
+    // Classical
+    "http://radio.linn.co.uk:8003/autodj", "http://stream.srg-ssr.ch/m/rsc_de/mp3_128", "http://174.36.1.135:8010/stream", "http://streams.abacus.fm/mozart.mp3", "http://streams.abacus.fm/beethoven.mp3",
+    "http://streams.abacus.fm/bach.mp3", "https://kusc.streamguys1.com/kusc-128", "http://audio-mp3.wcpe.org:80/wcpe.mp3", "https://streams.wgbh.org/wcrb.mp3", "http://classicalking.streamguys1.com/king-fm-128.mp3",
+    // Jazz
+    "http://radio.linn.co.uk:8004/autodj", "http://stream.srg-ssr.ch/m/rsj/mp3_128", "https://ice5.securenetsystems.net/JAZZ2", "https://jazzfm91.streamb.live/SB00009", "https://wbgo.streamguys.net/wbgo128",
+    "https://kjazz.streamguys1.com/kjazz-128.mp3", "http://192.235.87.133:8000/wjsu-jazz", "https://live-radio01.mediahubaustralia.com/JAZ/mp3/", "https://jazz24.streamguys1.com/jazz24-128.mp3", "http://tsfjazz.ice.infomaniak.ch/tsfjazz-high.mp3",
+    // Healing / Ambient
+    "http://ice1.somafm.com/dronezone-128-mp3", "http://ice1.somafm.com/groovesalad-128-mp3", "http://ice1.somafm.com/lush-128-mp3", "http://ice1.somafm.com/spacestation-128-mp3", "http://stream.aasp.fm:8000/",
+    "https://live.radioart.com/fSleep.mp3", "https://live.radioart.com/fStress_Relief.mp3", "http://stream.ambinatureradio.com:8000/1", "http://192.99.35.215:5052/stream", "http://listen.stillstream.com:8000/"
 };
 const int station_count = sizeof(station_urls) / sizeof(station_urls[0]);
 
